@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>BoxCounter.qml</file>
+        <file>MyMenu.qml</file>
+        <file>MyButton.qml</file>
+        <file>MyButtons.qml</file>
+        <file>StartButton.qml</file>
+        <file>StopButton.qml</file>
+        <file>SetButton.qml</file>
+    </qresource>
+</RCC>
