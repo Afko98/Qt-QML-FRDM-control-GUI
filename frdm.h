@@ -22,8 +22,11 @@ public:
 
 signals:
     void counterChanged(QString);
+    void triggerTimeChanged(QString);
+    void triggerNChanged(QString);
 public slots:
     void readSerial();
+    void setNorT(QString,int);
 
 
 private:

@@ -26,17 +26,18 @@ Item {
     }
 
     Rectangle{
-        width: 100
-        height: 86
+        id : errorLog
+        width: 320
+        height: 50
         border.color: "white"
         radius: 3
         border.width: 3
         color: "black"
         anchors{
             left: parent.left
-            leftMargin: 248
+            leftMargin: 20
             top: parent.top
-            topMargin: 381
+            topMargin: 470
         }
         Text{
             anchors.fill: parent

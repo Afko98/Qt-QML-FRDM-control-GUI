@@ -9,8 +9,7 @@ Item {
 
     signal buttonPressed();
     signal buttonPressedMod(var mod);
-
-
+    signal buttonSetPressed(var setText,var b);
 
     Text{
         text: "Time\nTringger:"
@@ -120,7 +119,7 @@ Item {
         radius: 5
         width: 25
         height: 25
-        color: "#097709"
+        color: "#025502"
         border.width: 2
         border.color: "black"
         anchors{
@@ -147,7 +146,7 @@ Item {
         border.color: "black"
         border.width: 2
         height: 25
-        color: "#ff2222"
+        color: "#ff2020"
         anchors{
             bottom: startButton.top
             bottomMargin: 10
@@ -166,22 +165,47 @@ Item {
         }
     }
     SetButton{
+        id:timeButton
         objectName: "setTime"
         anchors{
             left: parent.left
             leftMargin: 155
             top: parent.top
-            topMargin: 381
+            topMargin: 356
         }
     }
     SetButton{
+        id:nButton
         objectName: "setN"
         anchors{
             left: parent.left
             leftMargin: 155
             top: parent.top
-            topMargin: 437
+            topMargin: 412
         }
+    }
+
+    Text{
+        id: setTimeActive
+        text: "T: 500ms"
+        anchors{
+            left: timeButton.right
+            leftMargin: 10
+            verticalCenter: timeButton.verticalCenter
+        }
+        color: "white"
+        font.pixelSize: 15
+    }
+    Text{
+        id: setNActive
+        text: "N: 50"
+        anchors{
+            left: nButton.right
+            leftMargin: 10
+            verticalCenter: nButton.verticalCenter
+        }
+        color: "white"
+        font.pixelSize: 15
     }
 
     Column{
@@ -189,7 +213,7 @@ Item {
         anchors{
             top: parent.top
             left: parent.left
-            topMargin: 360
+            topMargin: 335
             leftMargin: 20
         }
         spacing: 5
@@ -240,9 +264,31 @@ Item {
 
     }
 
+    property string inputNText: inputN.text;
+    property string inputTText: inputTime.text;
+
     Component.onCompleted: {
         myButtons.buttonPressedMod.connect(changeBorderColorText);
+        myButtons.buttonSetPressed.connect(_frdm.setNorT);
+        _frdm.triggerTimeChanged.connect(setTimeForTrigger);
+        _frdm.triggerNChanged.connect(setNForTrigger);
     }
+    function setTimeForTrigger(txt){
+        setTimeActive.text="T: "+txt+"ms"
+    }
+    function setNForTrigger(txt){
+        setNActive.text="N: "+txt
+    }
+
+    function sendInputText(){
+        if(timeButton.isItOn){
+            buttonSetPressed(inputTText,0);
+        }
+        if(nButton.isItOn){
+            buttonSetPressed(inputNText,1);
+        }
+    }
+
     function changeBorderColorText(mod){
         if(mod===0){
             textT.border.color="#22aa22"
@@ -252,5 +298,4 @@ Item {
             textN.border.color="#22aa22"
         }
     }
-
 }

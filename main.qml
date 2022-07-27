@@ -5,9 +5,9 @@ import QtQuick.Controls 2.15
 Window {
     id: root
     width: 360
-    height: 550
+    height: 535
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("FRDM control")
 
     BoxCounter{
         id : counter

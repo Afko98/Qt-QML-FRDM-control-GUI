@@ -64,6 +64,8 @@ Rectangle{
             else{
                 border.color = borderRed
             }
+            if(isItOn)
+            myButtons.sendInputText();
         }
     }
 }

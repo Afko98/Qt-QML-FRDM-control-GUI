@@ -3,6 +3,7 @@
 #include <QSerialPort>
 #include "frdm.h"
 #include <QQmlContext>
+#include <QString>
 
 int main(int argc, char *argv[])
 {
@@ -14,13 +15,16 @@ int main(int argc, char *argv[])
     frdm->open();
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("_frdm",frdm);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
     engine.load(url);
+
 
 
 

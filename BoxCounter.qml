@@ -21,7 +21,7 @@ Item {
                 rightMargin: 10
                 leftMargin: 10
             }
-            height: parent.height/5
+            height: parent.height/6
             radius: 5
 
             Label{
