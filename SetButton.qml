@@ -16,7 +16,7 @@ Rectangle{
     }
     function changeBorderColor(mod){
         if(objectName==="setTime"){
-            if(mod===0){
+            if(mod===3 || mod===4 || mod===5){
                 isItOn=true
                 border.color = borderGreen
             }else{
@@ -25,7 +25,7 @@ Rectangle{
             }
         }
         if(objectName==="setN"){
-            if(mod===1){
+            if(mod===0 || mod===1 || mod===2){
                 isItOn=true
                 border.color = borderGreen
             }else{
@@ -64,7 +64,6 @@ Rectangle{
             else{
                 border.color = borderRed
             }
-            if(isItOn)
             myButtons.sendInputText();
         }
     }

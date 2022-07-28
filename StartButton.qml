@@ -7,6 +7,8 @@ Rectangle{
 
     property alias buttonText: buttonText.text
 
+
+
     radius: 3
     height: 30
     width: 85
@@ -30,10 +32,9 @@ Rectangle{
         }
 
         onReleased: {
-            myButton.border.color = "#22aa22"
-            greenLight.color = "#09ff09"
-            redLight.color = "#881111"
             _frdm._counter="0";
+            border.color = "#22aa22";
+            _frdm.startSystem();
         }
     }
 }

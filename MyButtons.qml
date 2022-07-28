@@ -41,7 +41,7 @@ Item {
             left: parent.left
             leftMargin:20
         }
-        mode: 0
+        mode: 3
     }
     MyButton{
         anchors{
@@ -51,7 +51,7 @@ Item {
             leftMargin:20
         }
         buttonText: "res: 2x"
-        mode: 0
+        mode: 4
     }
     MyButton{
         anchors{
@@ -61,7 +61,7 @@ Item {
             leftMargin:20
         }
         buttonText: "res: 4x"
-        mode: 0
+        mode: 5
     }
 
 
@@ -73,7 +73,7 @@ Item {
             left: parent.left
             leftMargin:120
         }
-        mode: 1
+        mode: 0
     }
     MyButton{
         id:button22
@@ -95,7 +95,7 @@ Item {
             leftMargin:120
         }
         buttonText: "res: 4x"
-        mode: 1
+        mode: 2
     }
     StartButton{
         id : startButton
@@ -272,17 +272,30 @@ Item {
         myButtons.buttonSetPressed.connect(_frdm.setNorT);
         _frdm.triggerTimeChanged.connect(setTimeForTrigger);
         _frdm.triggerNChanged.connect(setNForTrigger);
+        _frdm.systemOff.connect(setOffButtonColor);
+        _frdm.systemStart.connect(onSystemStart);
     }
-    function setTimeForTrigger(txt){
-        setTimeActive.text="T: "+txt+"ms"
+
+    function onSystemStart(){
+        greenLight.color = "#09ff09"
+        redLight.color = "#881111"
     }
-    function setNForTrigger(txt){
-        setNActive.text="N: "+txt
+    function setOffButtonColor(){
+        greenLight.color = "#025502";
+        redLight.color = "#ff2020";
+    }
+
+    function setTimeForTrigger(tt){
+        setTimeActive.text="T: "+tt+"ms"
+    }
+    function setNForTrigger(tt){
+        setNActive.text="N: "+tt
     }
 
     function sendInputText(){
         if(timeButton.isItOn){
             buttonSetPressed(inputTText,0);
+            console.log(inputTText);
         }
         if(nButton.isItOn){
             buttonSetPressed(inputNText,1);
@@ -290,7 +303,7 @@ Item {
     }
 
     function changeBorderColorText(mod){
-        if(mod===0){
+        if(mod===3 || mod===4 || mod===5){
             textT.border.color="#22aa22"
             textN.border.color="#aa2222"
         }else{

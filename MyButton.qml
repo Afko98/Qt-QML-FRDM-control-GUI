@@ -9,16 +9,19 @@ Rectangle{
 
     property bool isItOn: false
     property bool isItPressed: false
-    property int mode: -1
+    property int mode
 
     Component.onCompleted: {
-        myButtons.buttonPressed.connect(checkColor)
+        _frdm.modeChanged.connect(checkColorOnModeChanged)
     }
-
-    function checkColor(){
-        if(isItOn && !isItPressed){
+    function checkColorOnModeChanged(m){
+        console.log(mode);
+        console.log(m);
+        if(m===mode){
+            border.color="green";
+        }
+        else{
             border.color="white";
-            isItOn=false;
         }
     }
 
@@ -41,23 +44,22 @@ Rectangle{
     MouseArea{
         anchors.fill: parent
         onPressed: {
-            myButton.isItOn = !myButton.isItOn
+            myButton.isItOn = true;
             if(myButton.isItOn){
                 myButton.border.color = "gray"
             }
             myButton.isItPressed=true;
-            myButtons.buttonPressed();
         }
 
         onReleased: {
             if(myButton.isItOn){
-                myButton.border.color = "#22aa22"
+                myButton.border.color = "#ff2020"
             }
             else{
                 myButton.border.color = "white"
             }
-            myButton.isItPressed=false;
-            myButtons.buttonPressedMod(myButton.mode)
+            _frdm.changeMode(mode);
+            myButtons.buttonPressedMod(mode)
         }
     }
 }

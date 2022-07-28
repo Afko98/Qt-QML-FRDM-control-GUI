@@ -33,6 +33,7 @@ Rectangle{
             myButton.border.color = "red"
             greenLight.color = "#025502"
             redLight.color = "#ff2020"
+            _frdm.stopSystem();
         }
     }
 }

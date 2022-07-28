@@ -24,9 +24,17 @@ signals:
     void counterChanged(QString);
     void triggerTimeChanged(QString);
     void triggerNChanged(QString);
+    void systemOff();
+    void modeChanged(int);
+    void systemStart();
+    void error(QString);
+
 public slots:
     void readSerial();
     void setNorT(QString,int);
+    void changeMode(int);
+    void startSystem();
+    void stopSystem();
 
 
 private:
@@ -34,6 +42,7 @@ private:
     QByteArray serialData;
     QString serialBuffer;
     QString counter="0";
+    int currentMode=-1;
 };
 
 #endif // FRDM_H
