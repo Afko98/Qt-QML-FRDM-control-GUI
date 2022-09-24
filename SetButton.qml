@@ -9,8 +9,8 @@ Rectangle{
     property alias buttonText: buttonText.text
 
     property bool isItOn: false
-    property color borderRed: "#aa2222"
-    property color borderGreen: "#22aa22"
+    property color borderRed: "#777777"
+    property color borderGreen: "white"
     Component.onCompleted: {
         myButtons.buttonPressedMod.connect(changeBorderColor);
     }

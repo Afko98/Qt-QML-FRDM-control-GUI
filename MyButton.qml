@@ -54,6 +54,7 @@ Rectangle{
         onReleased: {
             if(myButton.isItOn){
                 myButton.border.color = "#ff2020"
+                _frdm.error("Mode not changed");
             }
             else{
                 myButton.border.color = "white"

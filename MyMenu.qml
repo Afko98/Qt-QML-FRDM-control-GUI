@@ -2,6 +2,16 @@ import QtQuick 2.0
 import QtQuick.Controls 2.15
 
 Item {
+    id:mainMenu
+
+    Component.onCompleted: {
+        _frdm.error.connect(changeErrorLog);
+    }
+
+    function changeErrorLog(txt){
+        errorText.text = "Sytem status:\n"+txt;
+    }
+
     Menu{
         id : menu
         MenuItem{
@@ -40,8 +50,9 @@ Item {
             topMargin: 470
         }
         Text{
+            id:errorText
             anchors.fill: parent
-            text: "Error log:\n---"
+            text: "Sytem status:\nNo errors"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             color: "white"

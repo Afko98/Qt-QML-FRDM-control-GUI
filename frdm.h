@@ -7,14 +7,20 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QFile>
+
 
 class Frdm : public QObject
 {
     Q_OBJECT
 
     Q_PROPERTY(QString _counter MEMBER counter NOTIFY counterChanged)
+
+
+
 public:
     explicit Frdm(QObject *parent = nullptr);
+    void writeToFile(QString);
     void open();
     ~Frdm();
     QString getCounter();
@@ -36,13 +42,16 @@ public slots:
     void startSystem();
     void stopSystem();
 
-
 private:
     QSerialPort *frdm;
     QByteArray serialData;
     QString serialBuffer;
     QString counter="0";
     int currentMode=-1;
+    bool fileCreated=false;
+    QString filename;
+    QFile *file;
+    QTextStream *stream;
 };
 
 #endif // FRDM_H

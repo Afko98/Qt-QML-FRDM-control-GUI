@@ -187,7 +187,7 @@ Item {
 
     Text{
         id: setTimeActive
-        text: "T: 500ms"
+        text: "T: 20ms"
         anchors{
             left: timeButton.right
             leftMargin: 10
@@ -304,11 +304,15 @@ Item {
 
     function changeBorderColorText(mod){
         if(mod===3 || mod===4 || mod===5){
-            textT.border.color="#22aa22"
-            textN.border.color="#aa2222"
+            textT.border.color="black"
+            textT.color="white"
+            textN.color="#777777"
+            textN.border.color="black"
         }else{
-            textT.border.color="#aa2222"
-            textN.border.color="#22aa22"
+            textT.color="#777777"
+            textN.color="white"
+            textT.border.color="black"
+            textN.border.color="black"
         }
     }
 }

@@ -1,9 +1,15 @@
 #include "frdm.h"
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
 
 Frdm::Frdm(QObject *parent)
     : QObject{parent}
 {
+     filename = "data.txt";
 
+     file = new QFile(filename);
+     stream = new QTextStream(file);
 }
 
 void Frdm::open()
@@ -22,7 +28,6 @@ void Frdm::open()
     }else{
         emit error("Error code 'P'");
     }
-
 }
 
 Frdm::~Frdm()
@@ -42,40 +47,54 @@ void Frdm::setCounter(const QString &c)
     counter=c;
     emit counterChanged(c);
 }
+void Frdm::writeToFile(QString serialBuffer){
 
+
+        if (file->open(QIODevice::ReadWrite| QIODevice::Append)) {
+
+                        *stream<<serialBuffer<<"\n";
+            file->close();
+                }
+            else
+            qDebug()<<"error opening file";
+}
 void Frdm::readSerial()
 {
     serialData = frdm->readAll();
-    if(QString::fromStdString(serialData.toStdString())=="\r"){
+    QString simbol = QString::fromStdString(serialData.toStdString());
+    if(simbol=="\r"){
         setCounter(serialBuffer);
+        writeToFile(serialBuffer);
         serialBuffer = "";
+        emit error("No errors");
         serialData.clear();
-    }else if(QString::fromStdString(serialData.toStdString())=="T"){
+    }else if(simbol=="T"){
         emit triggerTimeChanged(serialBuffer);
-        qDebug()<<serialBuffer<<"TTT";
         serialBuffer="";
         emit systemOff();
+        emit error("No errors");
         serialData.clear();
-    }else if(QString::fromStdString(serialData.toStdString())=="S"){
+    }else if(simbol=="S"){
         serialBuffer="";
         emit systemOff();
+        emit error("No errors");
         serialData.clear();
-    }else if(QString::fromStdString(serialData.toStdString())=="N"){
+    }else if(simbol=="N"){
         emit triggerNChanged(serialBuffer);
-        qDebug()<<serialBuffer<<"NNN";
+        emit error("No errors");
         serialBuffer="";
         emit systemOff();
         serialData.clear();
-    }else if(QString::fromStdString(serialData.toStdString())=="M"){
-        qDebug()<<serialBuffer;
+    }else if(simbol=="M"){
         currentMode=serialBuffer.toInt();
         emit modeChanged(currentMode);
         qDebug()<<"current mode: "<<serialBuffer.toInt();
         serialBuffer="";
+        emit error("No errors");
         serialData.clear();
         emit systemStart();
     }else{
-        serialBuffer = serialBuffer + QString::fromStdString(serialData.toStdString());
+        serialBuffer = serialBuffer + simbol;
         serialData.clear();
     }
 }
@@ -84,23 +103,21 @@ void Frdm::setNorT(QString n, int b)
 {
     QString number=n;
     for(int i=0;i<number.length();i++)
-            if(number[i]<'0' || number[i]>'9' || number.length()>999999){
-                qDebug()<<"Invalid input";
-                return;
-            }
-
-        if(frdm->isWritable()){
-            if(b==1)
-                frdm->write("n");
-            else
-                frdm->write("s");
-            number+="!";
-            frdm->write(number.toStdString().c_str());
-
-        }else{
-            qDebug() << "Couldnt write to serial";
+        if(number[i]<'0' || number[i]>'9' || number.length()>999999){
+            emit error("Invalid Input");
+            return;
         }
-        qDebug()<<number <<" "<<b;
+
+    if(frdm->isWritable()){
+        if(b==1)
+            frdm->write("n");
+        else
+            frdm->write("s");
+        number+="!";
+        frdm->write(number.toStdString().c_str());
+    }else{
+        emit error("Error code 'P' - Neispravno otvaranje porta");
+    }
 }
 
 void Frdm::changeMode(int mode)
@@ -109,21 +126,18 @@ void Frdm::changeMode(int mode)
         frdm->write("m");
         frdm->write(QString::number(mode).toStdString().c_str());
     }else{
-        qDebug() << "Couldnt write to serial";
+        emit error("Error code 'P' - Neispravno otvaranje porta");
     }
-    qDebug()<<"mode: "+QString::number(currentMode);
 }
 
 void Frdm::startSystem()
 {
-
     if(frdm->isWritable()){
         frdm->write("m");
         frdm->write(QString::number(currentMode).toStdString().c_str());
     }else{
-        qDebug() << "Couldnt write to serial";
+        emit error("Error code 'P' - Neispravno otvaranje porta");
     }
-    qDebug()<<"mode: "+QString::number(currentMode);
 }
 
 void Frdm::stopSystem()
@@ -131,9 +145,8 @@ void Frdm::stopSystem()
     if(frdm->isWritable()){
         frdm->write("#");
     }else{
-        qDebug() << "Couldnt write to serial";
+        emit error("Error code 'P' - Neispravno otvaranje porta");
     }
-    qDebug()<<"mode: "+QString::number(currentMode);
 }
 
 
