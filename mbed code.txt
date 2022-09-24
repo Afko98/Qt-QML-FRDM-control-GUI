@@ -1,0 +1,280 @@
+#include "mbed.h"
+
+InterruptIn A(PTD1);
+InterruptIn B(PTD2);
+DigitalOut led(PTD7);
+InterruptIn button(PTD5);
+Ticker flipper;
+
+Serial serial(USBTX,USBRX);
+
+int brojac=0;
+int T=20;
+int N=50,reset_at=10000;  //neke fiksne vrijednosti?
+int temp=0;
+char c,uslov='n';
+bool mod[6]={false}, stop=true; // 
+
+
+/*
+MOD 0-2 trigger camera every n impuls and send data
+    MOD0 - count on rise A (1x)
+    MOD1 - count on rise A & B (2x)
+    MOD2 - count on rise A & B and fall A & B (4x)
+
+MOD 3-5 send trigger camera every T[s] and send data
+    MOD3 - count on rise A (1x)
+    MOD4 - count on rise A & B (2x)
+    MOD5 - count on rise A & B and fall A & B (4x)
+*/
+
+
+////////////////////////////////////////////////
+void turnSystemOff(){
+    stop=true;
+    }
+////////////////////////////////////////////////
+void turnSystemOn(int m){ // or change mode
+    for(int i=0; i<6; i++)
+        if(i==m)
+            mod[i]=true;
+        else
+            mod[i]=false;
+            
+        stop=false;
+        brojac=0;
+    }
+
+////////////////////////////////////////////////
+
+void send1(){
+    if((mod[0] || mod[1] || mod[2]) && !stop)
+        serial.printf("%d\r",brojac);
+    }
+    
+void send2(){
+    serial.printf("%d\r",brojac);
+    }
+    
+
+////////////////////////////////////////////////
+void trigger_and_sendData(){
+    if(mod[3] || mod[4] || mod[5]){
+        led = 1;
+        send2();
+        led = 0;
+        }
+    }
+////////////////////////////////////////////////
+void lightOff(){
+    led = 0;
+    }    
+////////////////////////////////////////////////
+void reset(){
+    brojac=0;
+    }
+    
+////////////////////////////////////////////////
+
+void countAr(){
+        if(stop)
+            return;
+        
+        if(B.read())
+            brojac--;
+        else
+            brojac++;
+        
+        if(brojac>=reset_at || brojac<=-reset_at)
+            reset();
+        
+        if(mod[3] || mod[4] || mod[5])
+            return;
+            
+        if(brojac%N==0){
+            led=1;
+            send1();
+            }
+        else
+            led=0;
+    }
+    
+////////////////////////////////////////////////
+
+void countAf(){
+    
+    if(stop)
+        return;
+    
+    if(mod[0]||mod[3])
+        return;
+        
+        if(B.read())
+            brojac++;
+        else
+            brojac--;
+        
+        if(brojac>=reset_at || brojac<=-reset_at)
+            reset();
+            
+        if(mod[4] || mod[5])
+            return;
+        
+        if(brojac%N==0){
+            led=1;
+            send1();
+            }
+        else
+            led=0;
+    }
+////////////////////////////////////////////////
+
+void countBr(){
+    
+    if(stop)
+        return;
+            
+    if(!(mod[2]||mod[5]))
+        return;
+        
+        if(A.read())
+            brojac++;
+        else
+            brojac--;
+        
+        if(brojac>=reset_at || brojac<=-reset_at)
+            reset();
+            
+        if(mod[3] || mod[4] || mod[5])
+            return;
+        
+        if(brojac%N==0){
+            led=1;
+            send1();
+            }
+        else
+            led=0;
+    }
+////////////////////////////////////////////////
+
+void countBf(){
+    
+    if(stop)
+        return;
+    
+    if(!(mod[2]||mod[5]))
+        return;
+        
+        if(A.read())
+            brojac--;
+        else
+            brojac++;
+        
+        if(brojac>=reset_at || brojac<=-reset_at)
+            reset();
+        
+        if(mod[3] || mod[4] || mod[5])
+            return;
+        
+        if(brojac%N==0){
+            led=1;
+            send1();
+            }
+        else
+            led=0;
+    }
+
+///////////////////////////////////////////////
+    
+void read(){
+    
+    c=serial.getc();
+    
+    /*
+    r - reset
+    ! - kraj poruke
+    s - T
+    g - start
+    n - trigger_at
+    m - mode
+    # - system_off
+    */
+    
+    if(c=='r'){   /// read first sign
+        reset();
+        return;
+        }
+    else if(c=='s'){
+        uslov='s';
+    return;
+        }
+    else if(c=='m'){
+        int newMode=serial.getc()-'0';
+        serial.printf("%d", newMode);
+        serial.printf("M");
+        turnSystemOn(newMode);
+        return;
+        }
+    else if(c=='!'){
+        if(uslov=='s'){
+            T=temp;
+            serial.printf("%d", T);
+            serial.printf("T");
+            flipper.attach(&trigger_and_sendData, ((float)(T))/1000);
+            turnSystemOff();
+            /// posalji potvrdu
+            }
+        else if(uslov=='n'){
+            N=temp;
+            if(reset_at%N!=0){
+                reset_at=10000-10000%N;
+                }
+            serial.printf("%d", N);
+            serial.printf("N");
+            turnSystemOff();
+            }
+            /// posalji potvrdu
+        
+        temp=0;
+        return;
+        }
+    else if(c=='#'){
+        turnSystemOff();
+        serial.printf("S");
+        return;
+        }
+    else if(c=='n'){
+        uslov='n';
+        return;
+        }
+////////////
+    
+    if(uslov=='s')
+        if(c>='0' && c<='9'){
+            temp=temp*10+(c-'0');
+        }
+            //else  vrati gresku?
+        
+    if(uslov=='n')    
+        if(c>='0' && c<='9'){
+            temp=temp*10+(c-'0');    // dodaj triger at ms, za T period u ms.
+        }
+            //else  vrati gresku?
+}
+
+//////////////////////////////////////////////
+
+int main() {
+    
+    A.rise(&countAr);
+    A.fall(&countAf);
+    B.rise(&countBr);
+    B.fall(&countBf);
+    button.fall(&lightOff);
+    serial.attach(&read);
+    flipper.attach(&trigger_and_sendData, ((float)(T))/1000);
+ 
+    while(1) {
+       wait(0.5);
+        }
+}
